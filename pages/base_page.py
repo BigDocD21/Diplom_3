@@ -1,5 +1,7 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 class BasePage:
     def __init__(self, driver):
@@ -22,6 +24,13 @@ class BasePage:
 
     def is_visible(self, locator):
         try:
-            return self.find_element(locator).is_displayed()
-        except:
+            element = self.find_element(locator)
+            return element.is_displayed()
+        except (TimeoutException, NoSuchElementException):
             return False
+
+    def get_current_url(self):
+        return self.driver.current_url
+
+    def wait_for_invisibility(self, locator):
+        self.wait.until(EC.invisibility_of_element_located(locator))
