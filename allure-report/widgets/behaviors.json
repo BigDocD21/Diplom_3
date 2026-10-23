@@ -1,1 +1,1 @@
-{"total":1,"items":[{"uid":"374431b80cc2841a437cfb9875c079f7","name":"UI Main Flow","statistic":{"failed":0,"broken":2,"skipped":0,"passed":0,"unknown":0,"total":2}}]}
+{"total":2,"items":[{"uid":"4e5d49e2e9d4bf8852106d1472eaf4e8","name":"Constructor & Ingredients","statistic":{"failed":0,"broken":1,"skipped":0,"passed":0,"unknown":0,"total":1}},{"uid":"6c73d0c12e694b61514b9aaf19624dd5","name":"Order Feed & Global Counters","statistic":{"failed":0,"broken":1,"skipped":0,"passed":0,"unknown":0,"total":1}}]}

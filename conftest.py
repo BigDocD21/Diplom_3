@@ -23,7 +23,7 @@ def driver(request):
         driver = webdriver.Firefox(options=options)
     
     driver.maximize_window()
-    driver.get("https://stellarburgers.ru")
+    driver.get("https://stellarburgers.education-services.ru/")
     
     yield driver
     
