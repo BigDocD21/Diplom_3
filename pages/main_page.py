@@ -16,7 +16,7 @@ class MainPage(BasePage):
         return self.find_elements(MainLocators.INGREDIENT_CARD)
 
     @allure.step("Клик по зоне ингредиента/счетчику на карточке (индекс {index})")
-    def click_add_button_on_card(self, index=0):
+    def click_ingredient_card(self, index=0):
         cards = self.get_ingredient_cards()
         
         if index >= len(cards):
@@ -24,14 +24,12 @@ class MainPage(BasePage):
         
         card = cards[index]
         by, value = MainLocators.INGREDIENT_COUNTER
-        
+
         try:
             add_btn = card.find_element(by, value)
-            self.wait.until(lambda d: add_btn.is_enabled() and add_btn.is_displayed())
-            add_btn.click()
+            self.click_element_on_card(add_btn)
         except Exception:
-            self.wait.until(lambda d: card.is_enabled() and card.is_displayed())
-            card.click()
+            self.click_element_on_card(card)
 
     @allure.step("Клик по кнопке «Оформить заказ»")
     def click_order_button(self):
@@ -46,3 +44,19 @@ class MainPage(BasePage):
         all_time = self.get_text(MainLocators.COUNTER_ALL_TIME)
         today = self.get_text(MainLocators.COUNTER_TODAY)
         return all_time, today
+
+    @allure.step("Вход в систему: заполнение полей и отправка формы")
+    def login(self, email, password):
+        email_field = self.find_element(MainLocators.LOGIN_INPUT)
+        pass_field = self.find_element(MainLocators.PASSWORD_INPUT)
+        
+        email_field.clear()
+        email_field.send_keys(email)
+        pass_field.clear()
+        pass_field.send_keys(password)
+        pass_field.submit()
+
+    @allure.step("Клик по элементу (карточка или кнопка)")
+    def click_element_on_card(self, element):
+        self.wait.until(lambda d: element.is_displayed() and element.is_enabled())
+        element.click()

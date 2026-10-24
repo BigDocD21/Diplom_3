@@ -1,5 +1,6 @@
 import pytest
 import allure
+import re
 from pages.main_page import MainPage
 from pages.ingredient_modal import IngredientModal
 
@@ -37,20 +38,18 @@ class TestMainFlow:
         
         assert not modal.is_modal_open()
 
-    @allure.title("При добавлении ингредиента в заказ счётчик увеличивается")
+    @allure.title("При добавлении ингредиента локальный счётчик заказа увеличивается")
     def test_ingredient_counter_increases(self, logged_in_main_page):
         page = logged_in_main_page
         
         page.go_to_constructor()
-        
-        initial_all, initial_today = page.get_counters()
-        initial_all = int(initial_all)
-        initial_today = int(initial_today)
-        
+
+        initial_text = page.get_order_button_text()
+        initial_count = int(re.findall(r'\d+', initial_text)[-1])
+
         page.click_ingredient_card(index=0)
-        
-        new_all, new_today = page.get_counters()
-        new_all = int(new_all)
-        new_today = int(new_today)
-        
-        assert new_all > initial_all and new_today > initial_today
+
+        new_text = page.get_order_button_text()
+        new_count = int(re.findall(r'\d+', new_text)[-1])
+
+        assert new_count > initial_count

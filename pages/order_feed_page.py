@@ -1,19 +1,26 @@
 import allure
-from locators.order_page_locators import OrderPageLocators
+from locators.main_locators import MainLocators
 from pages.base_page import BasePage
+from selenium.webdriver.support import expected_conditions as EC
 
 class OrderFeedPage(BasePage):
     @allure.step("Получение списка карточек заказов в разделе «В работе»")
     def get_work_orders_list(self):
-        return self.find_elements(OrderPageLocators.ORDERS_LIST)
+        return self.find_elements(MainLocators.ORDERS_LIST)
+
+    @allure.step("Ожидание видимости элемента")
+    def wait_for_visibility(self, element):
+        self.wait.until(lambda d: element.is_displayed() and element.is_enabled())
 
     @allure.step("Получение номера первого заказа из списка")
     def get_first_order_number(self):
         orders = self.get_work_orders_list()
         if not orders:
             return None
+        
         first_order_card = orders[0]
         self.wait_for_visibility(first_order_card)
+        
         return first_order_card.text
 
     @allure.step("Проверка наличия конкретного номера заказа в ленте")
