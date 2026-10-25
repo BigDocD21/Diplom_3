@@ -24,7 +24,7 @@ class TestOrderFeed:
         initial_all = int(initial_all)
         
         page.go_to_constructor()
-        page.click_ingredient_card(index=0)
+        page.add_ingredient_via_drag_and_drop(index=0)
         page.click_order_button()
         
         page.go_to_feed()
@@ -42,7 +42,7 @@ class TestOrderFeed:
         initial_today = int(initial_today)
         
         page.go_to_constructor()
-        page.click_ingredient_card(index=0)
+        page.add_ingredient_via_drag_and_drop(index=0)
         page.click_order_button()
         
         page.go_to_feed()
@@ -58,7 +58,7 @@ class TestOrderFeed:
         modal = ingredient_modal
         
         page.go_to_constructor()
-        page.click_ingredient_card(index=0)
+        page.add_ingredient_via_drag_and_drop(index=0)
         page.click_order_button()
         
         modal_text = modal.get_modal_title()

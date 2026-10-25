@@ -2,6 +2,7 @@ import allure
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 class BasePage:
@@ -22,6 +23,12 @@ class BasePage:
         element = self.find_element(locator)
         self.wait.until(EC.element_to_be_clickable(element))
         element.click()
+
+    @allure.step("Перетаскивание элемента в целевую зону")
+    def drag_and_drop_element(self, source_element, target_locator):
+        target = self.find_element(target_locator)
+        actions = ActionChains(self.driver)
+        actions.drag_and_drop(source_element, target).perform()
 
     @allure.step("Получение текста элемента")
     def get_text(self, locator):

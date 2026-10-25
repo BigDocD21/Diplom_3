@@ -1,6 +1,8 @@
 import allure
 from locators.main_locators import MainLocators
 from pages.base_page import BasePage
+import re
+from selenium.common.exceptions import TimeoutException
 
 class MainPage(BasePage):
     @allure.step("Переход на вкладку «Конструктор»")
@@ -15,7 +17,7 @@ class MainPage(BasePage):
     def get_ingredient_cards(self):
         return self.find_elements(MainLocators.INGREDIENT_CARD)
 
-    @allure.step("Клик по зоне ингредиента/счетчику на карточке (индекс {index})")
+    @allure.step("Клик по карточке ингредиента (открывает модальное окно)")
     def click_ingredient_card(self, index=0):
         cards = self.get_ingredient_cards()
         
@@ -24,12 +26,23 @@ class MainPage(BasePage):
         
         card = cards[index]
         by, value = MainLocators.INGREDIENT_COUNTER
-
+        
         try:
             add_btn = card.find_element(by, value)
             self.click_element_on_card(add_btn)
         except Exception:
             self.click_element_on_card(card)
+    @allure.step("Перетаскивание ингредиента в зону конструктора (добавляет в заказ)")
+    def add_ingredient_via_drag_and_drop(self, index=0):
+        cards = self.get_ingredient_cards()
+        
+        if index >= len(cards):
+            raise IndexError(f"Недостаточно карточек ингредиентов. Запрошен индекс {index}, доступно {len(cards)}")
+        
+        source_card = cards[index]
+        target_zone = MainLocators.CONSTRUCTOR_DROP_AREA
+        
+        self.drag_and_drop_element(source_card, target_zone)
 
     @allure.step("Клик по кнопке «Оформить заказ»")
     def click_order_button(self):
@@ -45,18 +58,31 @@ class MainPage(BasePage):
         today = self.get_text(MainLocators.COUNTER_TODAY)
         return all_time, today
 
-    @allure.step("Вход в систему: заполнение полей и отправка формы")
-    def login(self, email, password):
-        email_field = self.find_element(MainLocators.LOGIN_INPUT)
-        pass_field = self.find_element(MainLocators.PASSWORD_INPUT)
-        
-        email_field.clear()
-        email_field.send_keys(email)
-        pass_field.clear()
-        pass_field.send_keys(password)
-        pass_field.submit()
-
     @allure.step("Клик по элементу (карточка или кнопка)")
     def click_element_on_card(self, element):
-        self.wait.until(lambda d: element.is_displayed() and element.is_enabled())
+        if not self.is_visible_element(element):
+            raise TimeoutException(f"Элемент не стал видимым для клика: {element}")
         element.click()
+
+    @allure.step("Проверка видимости кнопки «Оформить заказ»")
+    def is_order_button_visible(self):
+        return self.is_visible(MainLocators.ORDER_SUBMIT_BTN)
+
+    @allure.step("Получение значения счётчика ингредиента на карточке (индекс {index})")
+    def get_ingredient_counter_value(self, index=0):
+        cards = self.get_ingredient_cards()
+        
+        if index >= len(cards):
+            raise IndexError(f"Недостаточно карточек ингредиентов. Запрошен индекс {index}, доступно {len(cards)}")
+        
+        target_card = cards[index]
+        by, value = MainLocators.INGREDIENT_COUNTER
+        
+        counter_element = target_card.find_element(by, value)
+        text = counter_element.text
+        numbers = re.findall(r'\d+', text)
+        
+        if not numbers:
+            raise ValueError(f"Не удалось найти число в тексте счётчика: '{text}'")
+            
+        return int(numbers[-1])
