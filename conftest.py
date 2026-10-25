@@ -5,6 +5,7 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from pages.main_page import MainPage
 from pages.ingredient_modal import IngredientModal
 from pages.order_feed_page import OrderFeedPage
+from pages.login_page import LoginPage
 
 @pytest.fixture(params=["chrome", "firefox"])
 def driver(request):
@@ -42,11 +43,14 @@ def order_feed_page(driver):
     return OrderFeedPage(driver)
 
 @pytest.fixture
-def logged_in_main_page(driver):
-    page = MainPage(driver)
-    email = "test@test.com"
-    password = "password123"
-    
-    page.login(email, password)
+def logged_in_main_page(driver, user_data):
 
-    return page
+    email = user_data["email"]
+    password = user_data["password"]
+
+    login_page = LoginPage(driver)
+
+    login_page.open_login_page()
+    login_page.login(email, password)
+
+    return MainPage(driver) 

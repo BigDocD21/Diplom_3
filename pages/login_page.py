@@ -3,20 +3,18 @@ from locators.main_locators import MainLocators
 from pages.base_page import BasePage
 
 class LoginPage(BasePage):
+
+    LOGIN_PATH = "/login"
+
     @allure.step("Переход на страницу входа")
     def open_login_page(self):
-        current_url = self.driver.current_url
 
-        if "/login" in current_url:
+        current_url = self.get_current_url()
+
+        if self.LOGIN_PATH in current_url:
             return
-        
-        parts = current_url.split('://', 1)
-        protocol = parts[0]
-        rest = parts[1] if len(parts) > 1 else current_url
-        domain = rest.split('/', 1)[0]
-        
-        login_url = f"{protocol}://{domain}/login"
-        self.driver.get(login_url)
+
+        self.open_page(self.LOGIN_PATH)
 
     @allure.step("Ввод данных и отправка формы входа")
     def login(self, email, password):

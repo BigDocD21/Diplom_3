@@ -6,9 +6,17 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 class BasePage:
-    def __init__(self, driver):
+
+    def __init__(self, driver, base_url):
         self.driver = driver
+        self.base_url = base_url
         self.wait = WebDriverWait(driver, 15)
+
+    @allure.step("Открытие страницы по относительному пути")
+    def open_page(self, path):
+
+        full_url = f"{self.base_url.rstrip('/')}/{path.lstrip('/')}"
+        self.driver.get(full_url)
 
     @allure.step("Поиск элемента по локатору")
     def find_element(self, locator):
