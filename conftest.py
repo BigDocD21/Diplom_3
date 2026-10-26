@@ -24,33 +24,45 @@ def driver(request):
         driver = webdriver.Firefox(options=options)
     
     driver.maximize_window()
-    driver.get("https://stellarburgers.education-services.ru/")
+    start_url = "https://stellarburgers.education-services.ru/"
+    driver.get(start_url)
     
     yield driver
     
     driver.quit()
 
 @pytest.fixture
+def user_data():
+    return {
+        "email": "test_user_123@mail.ru", 
+        "password": "TestTest123" 
+    }
+
+@pytest.fixture
 def main_page(driver):
-    return MainPage(driver)
+    base_url = driver.current_url.rstrip('/')
+    return MainPage(driver, base_url)
 
 @pytest.fixture
 def ingredient_modal(driver):
-    return IngredientModal(driver)
+    base_url = driver.current_url.rstrip('/')
+    return IngredientModal(driver, base_url)
 
 @pytest.fixture
 def order_feed_page(driver):
-    return OrderFeedPage(driver)
+    base_url = driver.current_url.rstrip('/')
+    return OrderFeedPage(driver, base_url)
 
 @pytest.fixture
 def logged_in_main_page(driver, user_data):
-
     email = user_data["email"]
     password = user_data["password"]
-
-    login_page = LoginPage(driver)
-
+    
+    base_url = driver.current_url.rstrip('/')
+    
+    login_page = LoginPage(driver, base_url)
+    
     login_page.open_login_page()
     login_page.login(email, password)
-
-    return MainPage(driver) 
+    
+    return MainPage(driver, base_url)
