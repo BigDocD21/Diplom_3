@@ -1,48 +1,30 @@
-import pytest
 import allure
-from pages.main_page import MainPage
-from pages.ingredient_modal import IngredientModal
 
-@allure.feature("Constructor & Ingredients")
-@allure.story("Main Flow Verification")
+
+@allure.feature("Конструктор и Ингредиенты")
+@allure.story("Проверка основной функциональности")
 class TestMainFlow:
-
     @allure.title("Переход по клику на «Конструктор»")
-    def test_navigate_to_constructor(self, logged_in_main_page):
-        page = logged_in_main_page
-        page.go_to_feed()
-        page.go_to_constructor()
-        assert page.is_order_button_visible()
+    def test_navigate_to_constructor(self, main_page):
+        main_page.go_to_feed()
+        main_page.go_to_constructor()
+        assert main_page.is_constructor_visible()
 
-    @allure.title("При клике на ингредиент открывается всплывающее окно с деталями")
-    def test_ingredient_modal_opens(self, logged_in_main_page, ingredient_modal):
-        page = logged_in_main_page
-        modal = ingredient_modal
-        
-        page.go_to_constructor()
-        page.click_ingredient_card(index=0)
-        
-        assert modal.is_modal_open()
+    @allure.title("При клике на ингредиент открывается окно с деталями")
+    def test_ingredient_modal_opens(self, main_page, ingredient_modal):
+        main_page.click_ingredient_card(index=0)
+        assert ingredient_modal.is_modal_open()
 
-    @allure.title("Всплывающее окно закрывается кликом по крестику")
-    def test_modal_closes_on_click(self, logged_in_main_page, ingredient_modal):
-        page = logged_in_main_page
-        modal = ingredient_modal
-        
-        page.go_to_constructor()
-        page.click_ingredient_card(index=0)
-        
-        modal.close_modal()
-        modal.wait_for_modal_to_close()
-        
-        assert not modal.is_modal_open()
+    @allure.title("Окно ингредиента закрывается кликом по крестику")
+    def test_modal_closes_on_click(self, main_page, ingredient_modal):
+        main_page.click_ingredient_card(index=0)
+        assert ingredient_modal.is_modal_open()
+        ingredient_modal.close_modal()
+        assert ingredient_modal.wait_for_modal_to_close()
 
     @allure.title("При добавлении ингредиента счётчик на карточке увеличивается")
-    def test_ingredient_counter_increases(self, logged_in_main_page):
-        page = logged_in_main_page
-        page.go_to_constructor()
-        initial_count = page.get_ingredient_counter_value(index=0)
-        page.add_ingredient_via_drag_and_drop(index=0)
-        new_count = page.get_ingredient_counter_value(index=0)
-
+    def test_ingredient_counter_increases(self, main_page):
+        initial_count = main_page.get_ingredient_counter_value(index=0)
+        main_page.add_ingredient_via_drag_and_drop(index=0)
+        new_count = main_page.wait_for_ingredient_counter_increase(initial_count, index=0)
         assert new_count > initial_count

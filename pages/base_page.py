@@ -1,7 +1,6 @@
 import allure
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
@@ -28,13 +27,42 @@ class BasePage:
 
     @allure.step("Клик по элементу (с ожиданием кликабельности)")
     def click_element(self, locator):
-        element = self.find_element(locator)
-        self.wait.until(EC.element_to_be_clickable(element))
-        element.click()
+        self.wait.until(EC.element_to_be_clickable(locator)).click()
 
     @allure.step("Перетаскивание элемента в целевую зону")
     def drag_and_drop_element(self, source_element, target_locator):
-        target = self.find_element(target_locator)
+        target = self.wait.until(EC.visibility_of_element_located(target_locator))
+        if self.driver.capabilities.get("browserName") == "firefox":
+            self.driver.execute_async_script(
+                """
+                const [source, target, done] = arguments;
+                const dataTransfer = new DataTransfer();
+                const rect = target.getBoundingClientRect();
+                const coords = {
+                    clientX: rect.x + rect.width / 2,
+                    clientY: rect.y + rect.height / 2,
+                };
+                const fire = (element, type, position) => element.dispatchEvent(
+                    new DragEvent(type, {
+                        bubbles: true, cancelable: true, dataTransfer, ...position,
+                    })
+                );
+                fire(source, 'dragstart', {});
+                // React DnD обрабатывает перемещение в следующем кадре.
+                setTimeout(() => {
+                    fire(target, 'dragenter', coords);
+                    fire(target, 'dragover', coords);
+                }, 100);
+                setTimeout(() => {
+                    fire(target, 'drop', coords);
+                    fire(source, 'dragend', coords);
+                    done();
+                }, 250);
+                """,
+                source_element,
+                target,
+            )
+            return
         actions = ActionChains(self.driver)
         actions.drag_and_drop(source_element, target).perform()
 
@@ -45,8 +73,8 @@ class BasePage:
     @allure.step("Проверка видимости элемента по локатору")
     def is_visible(self, locator):
         try:
-            element = self.find_element(locator)
-            return element.is_displayed()
+            self.wait.until(EC.visibility_of_element_located(locator))
+            return True
         except (TimeoutException, NoSuchElementException):
             return False
 
@@ -64,4 +92,4 @@ class BasePage:
 
     @allure.step("Ожидание исчезновения элемента по локатору")
     def wait_for_invisibility(self, locator):
-        self.wait.until(EC.invisibility_of_element_located(locator))
+        return self.wait.until(EC.invisibility_of_element_located(locator))
