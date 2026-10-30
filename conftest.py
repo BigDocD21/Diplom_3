@@ -14,6 +14,8 @@ from pages.main_page import MainPage
 from pages.order_feed_page import OrderFeedPage
 
 
+from helpers import get_fake_user_data
+
 def pytest_addoption(parser):
     parser.addoption(
         "--browser",
@@ -71,11 +73,10 @@ def user_data(base_url):
         yield {"email": email, "password": password}
         return
 
-    user = {
-        "email": f"test-{uuid.uuid4().hex}@example.org",
-        "password": secrets.token_urlsafe(24),
-        "name": "Тестовый пользователь",
-    }
+
+    user = get_fake_user_data()
+
+
     try:
         response = requests.post(f"{base_url}/api/auth/register", json=user, timeout=30)
         response.raise_for_status()
